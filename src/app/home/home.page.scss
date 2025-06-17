@@ -1,27 +1,72 @@
-#container {
+.pokemon-card {
+  margin: 16px 0;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+    .pokemon-image {
+      filter: grayscale(0.5);
+      transition: filter 0.2s ease-in-out;
+    }
+  }
+}
+
+.pokemon-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #7f8c8d;
+  min-height: 200px;
+}
+
+.pokemon-image {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.pokemon-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #dfdfdf;
   text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
   margin: 0;
 }
 
-#container a {
-  text-decoration: none;
+ion-card-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.load-more-container {
+  padding: 20px;
+  text-align: center;
+}
+
+.load-more-btn {
+  --background: #3498db;
+  --color: white;
+  margin: 20px 0;
+  height: 50px;
+}
+
+ion-content {
+  --background: #000000;
+}
+
+ion-header {
+  ion-toolbar {
+    --background: #2c3e50;
+    --color: white;
+  }
+
+  ion-title {
+    text-align: center;
+    font-weight: bold;
+  }
 }

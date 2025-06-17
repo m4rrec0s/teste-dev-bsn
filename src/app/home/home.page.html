@@ -1,20 +1,32 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      Pokédex
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="6" size-lg="4" *ngFor="let pokemon of pokemons">
+        <ion-card (click)="goToDetails(pokemon.url)" class="pokemon-card">
+          <div class="pokemon-image-container">
+            <ion-img [src]="pokemon.image" [alt]="pokemon.name + ' sprite'" class="pokemon-image"></ion-img>
+          </div>
+          <ion-card-header>
+            <ion-card-title class="pokemon-name">{{ pokemon.name | titlecase }}</ion-card-title>
+            <ion-card-subtitle>#{{ pokemon.id }}</ion-card-subtitle>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="load-more-container">
+    <ion-button expand="block" (click)="loadPokemons()" [disabled]="loading" class="load-more-btn">
+      <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+      <span *ngIf="!loading">Carregar Mais</span>
+    </ion-button>
   </div>
 </ion-content>
