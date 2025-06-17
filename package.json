@@ -60,7 +60,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.10",
+    "tailwindcss": "^3.4.0",
     "typescript": "~5.6.3"
   },
   "description": "An Ionic project"

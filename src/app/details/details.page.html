@@ -1,0 +1,279 @@
+<ion-header [translucent]="true" class="bg-black shadow-xl border-b border-pokemon-yellow/20">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"
+        class="text-white hover:bg-white/20 rounded-lg transition-all"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="space-x-2 text-center font-extrabold text-xl tracking-wide">
+      <span>{{ pokemon?.name | titlecase }}</span>
+      <span class="text-sm text-pokemon-yellow">#{{ pokemon?.id }}</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-gradient-to-br from-black via-gray-900 to-gray-950 text-white" *ngIf="pokemon">
+  <div class="grid grid-cols-1 sm:grid-cols-2 bg-gray-800/60 rounded-lg relative mx-2 px-4 mt-3">
+    <div class="w-full h-full max-h-[400px] flex justify-center items-center">
+      <ion-img [src]="pokemon.sprites?.other['official-artwork']?.front_default || pokemon.sprites?.front_default"
+        [alt]="pokemon.name + ' sprite'" class="w-[80%] h-[80%] object-contain drop-shadow-xl" />
+    </div>
+
+    <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md">
+      <div class="p-4 flex gap-4 items-center">
+        <h1 class="text-4xl font-bold text-white">
+          {{ pokemon.name | titlecase }}
+        </h1>
+        <span class="text-gray-400 font-semibold text-xl">
+          #{{ pokemon.id }}
+        </span>
+      </div>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row class="mb-2">
+            <ion-col size="6" class="flex flex-col items-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Altura</span>
+              <span class="text-lg font-bold text-white">{{ pokemon.height / 10 }}<span class="text-sm font-normal">
+                  m</span></span>
+            </ion-col>
+            <ion-col size="6" class="flex flex-col items-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Peso</span>
+              <span class="text-lg font-bold text-white">{{ pokemon.weight / 10 }}<span class="text-sm font-normal">
+                  kg</span></span>
+            </ion-col>
+          </ion-row>
+          <ion-row class="mb-2">
+            <ion-col size="6" class="flex flex-col items-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Experiência Base</span>
+              <span class="text-lg font-bold" [ngClass]="getExperienceClass()">{{ pokemon.base_experience || 'N/A'
+                }}</span>
+            </ion-col>
+            <ion-col size="6" class="flex flex-col items-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Taxa de Captura</span>
+              <span class="text-lg font-bold text-green-400">{{ getCaptureRate() }}</span>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12" class="flex flex-col items-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Tipos</span>
+              <div class="mt-2 flex flex-wrap justify-center gap-2">
+                <ion-chip *ngFor="let type of pokemon.types" [style.background-color]="getTypeColor(type.type.name)"
+                  class="text-white font-semibold px-3 py-1 rounded-full border border-white/20">
+                  {{ type.type.name | titlecase }}
+                </ion-chip>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4" *ngIf="description">
+    <ion-card-header>
+      <ion-card-title class="text-white">Descrição</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p class="text-gray-300 leading-relaxed">{{ description }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4">
+    <ion-card-header>
+      <ion-card-title class="text-white">Habilidades</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="flex flex-wrap gap-2">
+        <ion-chip *ngFor="let ability of pokemon.abilities"
+          [class]="ability.is_hidden ? 'bg-purple-600/40 border border-purple-400' : 'bg-pokemon-blue/20'"
+          class="text-white font-semibold">
+          {{ ability.ability.name | titlecase }}
+          <span *ngIf="ability.is_hidden" class="text-xs text-purple-300 ml-1">(Oculta)</span>
+        </ion-chip>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4" *ngIf="pokemonSpecies">
+    <ion-card-header>
+      <ion-card-title class="text-white">Informações Biológicas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row class="mb-3">
+          <ion-col size="6" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Gênero</span>
+            <span class="text-sm text-white">{{ getGenderRate() }}</span>
+          </ion-col>
+          <ion-col size="6" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Habitat</span>
+            <span class="text-sm text-white">{{ getHabitat() | titlecase }}</span>
+          </ion-col>
+        </ion-row>
+        <ion-row class="mb-3">
+          <ion-col size="6" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Taxa de Crescimento</span>
+            <span class="text-sm text-white">{{ getGrowthRate() }}</span>
+          </ion-col>
+          <ion-col size="6" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Passos para Chocar</span>
+            <span class="text-sm text-white">{{ (pokemonSpecies.hatch_counter * 255) || 'N/A' }}</span>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="getEggGroups().length > 0">
+          <ion-col size="12" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase tracking-wide mb-2">Grupos de Ovos</span>
+            <div class="flex flex-wrap gap-2">
+              <ion-chip *ngFor="let group of getEggGroups()" class="bg-green-600/30 text-green-200 font-semibold">
+                {{ group }}
+              </ion-chip>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4">
+    <ion-card-header>
+      <ion-card-title class="text-white">Estatísticas Base</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="flex flex-col sm:flex-row gap-6 items-center justify-center">
+        <div class="flex-1 flex flex-col items-center justify-center">
+          <div *ngIf="pokemon?.gif; else noGif" class="w-full h-full flex flex-col items-center">
+            <ion-img [src]="pokemon.gif" [alt]="'pokemon gif - ' + pokemon.name"
+              class="min-w-[100px]  w-auto h-auto max-h-[80%] rounded-lg shadow-lg" />
+          </div>
+          <ng-template #noGif>
+            <div class="flex flex-col items-center justify-center p-6 bg-gray-700/50 rounded-lg">
+              <ion-icon name="image-outline" class="text-6xl text-gray-400 mb-3"></ion-icon>
+              <p class="text-gray-300 text-center">Animação não disponível para este Pokémon</p>
+            </div>
+          </ng-template>
+        </div>
+        <div class="flex-1 w-full">
+          <div *ngFor="let stat of pokemon.stats" class="mb-4">
+            <div class="flex justify-between text-sm font-semibold text-gray-300 mb-1">
+              <span>{{ getStatName(stat.stat.name) }}</span>
+              <span>{{ stat.base_stat }}</span>
+            </div>
+            <div class="w-full bg-gray-700 h-3 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-gradient-to-r from-pokemon-red to-pokemon-yellow rounded-full transition-all duration-500"
+                [style.width.%]="(stat.base_stat / 255) * 100"></div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-gray-600">
+            <div class="flex justify-between text-lg font-bold text-white">
+              <span>Total</span>
+              <span>{{ getTotalStats() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4"
+    *ngIf="pokemon.moves && pokemon.moves.length > 0">
+    <ion-card-header>
+      <ion-card-title class="text-white">Movimentos (Primeiros 20)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div *ngFor="let move of pokemon.moves.slice(0, 20)" class="bg-gray-700/50 p-2 rounded-lg">
+          <span class="text-sm text-white font-medium">{{ move.move.name | titlecase }}</span>
+          <div class="text-xs text-gray-400 mt-1">
+            Nível: {{ move.version_group_details[0]?.level_learned_at || 'N/A'
+            }}
+          </div>
+        </div>
+      </div>
+      <div *ngIf="pokemon.moves.length > 20" class="mt-3 text-center">
+        <span class="text-xs text-gray-400">E mais {{ pokemon.moves.length - 20 }} movimentos...</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4">
+    <ion-card-header>
+      <ion-card-title class="text-white">Sprites</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6" size-md="3" *ngIf="pokemon.sprites?.front_default">
+            <div class="text-center">
+              <img [src]="pokemon.sprites.front_default" alt="Frente" class="w-32 h-32 mx-auto" />
+              <p class="text-sm text-gray-300 mt-1">Frente</p>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3" *ngIf="pokemon.sprites?.back_default">
+            <div class="text-center">
+              <img [src]="pokemon.sprites.back_default" alt="Costas" class="w-32 h-32 mx-auto" />
+              <p class="text-sm text-gray-300 mt-1">Costas</p>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3" *ngIf="pokemon.sprites?.front_shiny">
+            <div class="text-center">
+              <img [src]="pokemon.sprites.front_shiny" alt="Shiny Frente" class="w-32 h-32 mx-auto" />
+              <p class="text-sm text-yellow-300 mt-1">Shiny Frente</p>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="3" *ngIf="pokemon.sprites?.back_shiny">
+            <div class="text-center">
+              <img [src]="pokemon.sprites.back_shiny" alt="Shiny Costas" class="w-32 h-32 mx-auto" />
+              <p class="text-sm text-yellow-300 mt-1">Shiny Costas</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-md mt-4 mb-6">
+    <ion-card-header>
+      <ion-card-title class="text-white">Resumo</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">Pokédex Nacional:</span>
+          <span class="text-white font-semibold">#{{ pokemon.id }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">Ordem:</span>
+          <span class="text-white font-semibold">{{ pokemon.order || 'N/A' }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">É padrão:</span>
+          <span class="text-white font-semibold">{{ pokemon.is_default ? 'Sim' : 'Não' }}</span>
+        </div>
+        <div class="flex justify-between items-center" *ngIf="pokemonSpecies">
+          <span class="text-gray-400">É bebê:</span>
+          <span class="text-white font-semibold">{{ pokemonSpecies.is_baby ? 'Sim' : 'Não' }}</span>
+        </div>
+        <div class="flex justify-between items-center" *ngIf="pokemonSpecies">
+          <span class="text-gray-400">É lendário:</span>
+          <span class="text-white font-semibold">{{ pokemonSpecies.is_legendary ? 'Sim' : 'Não' }}</span>
+        </div>
+        <div class="flex justify-between items-center" *ngIf="pokemonSpecies">
+          <span class="text-gray-400">É mítico:</span>
+          <span class="text-white font-semibold">{{ pokemonSpecies.is_mythical ? 'Sim' : 'Não' }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<ion-content *ngIf="loading" class="ion-padding bg-black text-white text-center">
+  <ion-spinner name="crescent"></ion-spinner>
+  <p>Carregando informações do Pokémon...</p>
+</ion-content>
+
+<ion-content *ngIf="!pokemon && !loading" class="ion-padding bg-black text-white text-center">
+  <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+  <h2 class="text-xl font-bold mt-2">Pokémon não encontrado</h2>
+  <p>Não foi possível carregar as informações do Pokémon.</p>
+  <ion-button routerLink="/home" fill="outline" color="light" class="mt-4">Voltar à lista</ion-button>
+</ion-content>
