@@ -199,4 +199,8 @@ export class HomePage implements OnInit, OnDestroy {
         },
       });
   }
+
+  getIcon() {
+    return 'assets/poke-icon.png';
+  }
 }

@@ -1,8 +1,11 @@
 <ion-header [translucent]="true" class="bg-black shadow-xl border-b border-pokemon-yellow/20">
-  <ion-toolbar>
-    <ion-title class="font-extrabold text-2xl drop-shadow-md">
-      Pokédex
-    </ion-title>
+  <ion-toolbar class="px-5">
+    <div class="flex items-center space-x-2">
+      <ion-img [src]="getIcon()" alt="Pokédex Icon" class="h-[30px]"></ion-img>
+      <ion-title class="font-extrabold text-2xl drop-shadow-md p-0">
+        Pokédex
+      </ion-title>
+    </div>
     <ion-buttons slot="end">
       <ion-button routerLink="/favorites">
         <ion-icon name="star" class="text-yellow-400 mr-1"></ion-icon>
