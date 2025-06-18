@@ -1,27 +1,43 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PokemonService } from '../services/pokemon.service';
+import { FavoritesService } from '../services/favorites.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-details',
   templateUrl: './details.page.html',
   standalone: false,
 })
-export class DetailsPage implements OnInit {
+export class DetailsPage implements OnInit, OnDestroy {
   pokemon: any = null;
   pokemonSpecies: any = null;
   loading = true;
   description: string = '';
+  isFavorited: boolean = false;
+  private favoritesSubscription: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
-    private pokemonService: PokemonService
+    private pokemonService: PokemonService,
+    private favoritesService: FavoritesService
   ) {}
-
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadPokemonDetails(id);
+
+      this.favoritesSubscription = this.favoritesService.favorites$.subscribe(
+        (favorites) => {
+          this.isFavorited = id ? favorites.includes(Number(id)) : false;
+        }
+      );
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.favoritesSubscription) {
+      this.favoritesSubscription.unsubscribe();
     }
   }
   loadPokemonDetails(id: string) {
@@ -99,5 +115,14 @@ export class DetailsPage implements OnInit {
 
   goBack() {
     window.history.back();
+  }
+
+  toggleFavorite(event: Event): void {
+    if (this.pokemon && this.pokemon.id) {
+      this.favoritesService.toggleFavorite(this.pokemon.id);
+    }
+  }
+  isFavorite(): boolean {
+    return this.isFavorited;
   }
 }

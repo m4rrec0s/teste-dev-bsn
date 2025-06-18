@@ -1,12 +1,18 @@
 <ion-header [translucent]="true" class="bg-black shadow-xl border-b border-pokemon-yellow/20">
   <ion-toolbar>
-    <ion-buttons slot="start" onclick="goBack()">
-      <ion-back-button class="text-white hover:bg-white/20 rounded-lg transition-all"></ion-back-button>
+    <ion-buttons slot="start" title="Voltar">
+      <ion-back-button onclick="goBack()"></ion-back-button>
     </ion-buttons>
     <ion-title class="space-x-2 text-center font-extrabold text-xl tracking-wide">
       <span>{{ pokemon?.name | titlecase }}</span>
       <span class="text-sm text-pokemon-yellow">#{{ pokemon?.id }}</span>
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFavorite($event)">
+        <ion-icon [name]="isFavorite() ? 'star' : 'star-outline'"
+          [class]="isFavorite() ? 'text-yellow-400' : 'text-white/80'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
