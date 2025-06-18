@@ -35,47 +35,49 @@
         class="flex flex-col items-center justify-center my-8 p-8 bg-neutral-800/50 rounded-2xl">
         <ion-icon name="star-outline" class="text-6xl text-pokemon-yellow mb-4"></ion-icon>
         <h2 class="text-xl font-bold text-white mb-2">Nenhum Pokémon favorito</h2>
-        <p class="text-center text-white/70">Você ainda não adicionou nenhum Pokémon aos seus favoritos.</p>
+        <p class="text-center text-white/70">Os pokemons que você adicionar como favorito irão aparecer por aqui.</p>
         <ion-button class="mt-4" routerLink="/">Explorar Pokémon</ion-button>
-    </ion-toolbar> <ion-grid *ngIf="!loading && !noFavorites && !loadingError"
-        class="w-full flex flex-col items-center">
+    </ion-toolbar>
+    <ion-grid *ngIf="!loading && !noFavorites && !loadingError" class="w-full flex flex-col items-center">
         <div *ngIf="usingCachedData"
             class="w-full max-w-5xl mb-4 bg-amber-500/20 border border-amber-500/30 rounded-lg p-3 text-center">
             <ion-icon name="cloud-offline-outline" class="text-xl mr-2 text-amber-500"></ion-icon>
-            <span class="text-amber-300">Exibindo dados salvos localmente devido a problemas de conexão.</span>
+            <span class="text-amber-300">Showing locally saved data due to connection issues.</span>
         </div>
-        <ion-row class="max-w-5xl">
-            <ion-col size="6" size-md="6" size-lg="3" *ngFor="let pokemon of favorites">
-                <ion-card (click)="goToDetails(pokemon.url)"
-                    class="relative transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
-                    <div>
-                        <ion-buttons slot="start" class="absolute left-2 top-2 z-20">
-                            <ion-button fill="clear" (click)="toggleFavorite($event, pokemon.id)">
-                                <ion-icon name="star" class="text-yellow-400"></ion-icon>
-                            </ion-button>
-                        </ion-buttons>
-                    </div>
-                    <ion-toolbar
-                        class="relative overflow-hidden rounded-t-2xl flex justify-center items-center p-4 bg-neutral-100/60">
-                        <ion-img [src]="pokemon.image" [alt]="pokemon.name + ' sprite'"
-                            class="z-10 transition-transform duration-300 h-[180px]"></ion-img>
-                    </ion-toolbar>
-                    <span class="text-sm text-neutral-300 px-2 pt-4">
-                        #000{{ pokemon.id }}
-                    </span>
-                    <ion-card-header class="text-center">
-                        <ion-card-title class="text-xl font-bold text-white drop-shadow-sm">
-                            {{ pokemon.name | titlecase }}
-                        </ion-card-title>
-                        <div class="flex flex-wrap justify-center space-x-2 mt-2">
-                            <span *ngFor="let type of pokemon.types" [style.background-color]="getTypeColor(type)"
-                                class="px-2 py-1 rounded-full text-xs font-semibold text-white border shadow-sm">
-                                {{ type | titlecase }}
-                            </span>
+        <div class="w-full max-w-5xl">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
+                <div *ngFor="let pokemon of favorites" class="w-full max-w-[300px] min-w-[200px] mb-4">
+                    <ion-card (click)="goToDetails(pokemon.url)"
+                        class="w-full relative cursor-pointer transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
+                        <div>
+                            <ion-buttons slot="start" class="absolute left-2 top-2 z-20">
+                                <ion-button fill="clear" (click)="toggleFavorite($event, pokemon.id)">
+                                    <ion-icon name="star" class="text-yellow-400"></ion-icon>
+                                </ion-button>
+                            </ion-buttons>
                         </div>
-                    </ion-card-header>
-                </ion-card>
-            </ion-col>
-        </ion-row>
+                        <ion-toolbar
+                            class="relative overflow-hidden rounded-t-2xl flex justify-center items-center p-4 bg-neutral-100/60">
+                            <ion-img [src]="pokemon.image" [alt]="pokemon.name + ' sprite'"
+                                class="z-10 transition-transform duration-300 h-[180px]"></ion-img>
+                        </ion-toolbar>
+                        <span class="text-sm text-neutral-300 px-2 pt-4">
+                            #000{{ pokemon.id }}
+                        </span>
+                        <ion-card-header class="text-center">
+                            <ion-card-title class="text-xl font-bold text-white drop-shadow-sm">
+                                {{ pokemon.name }}
+                            </ion-card-title>
+                            <div class="flex flex-wrap justify-center space-x-2 mt-2">
+                                <span *ngFor="let type of pokemon.types" [style.background-color]="getTypeColor(type)"
+                                    class="px-2 py-1 rounded-full text-xs font-semibold text-white border shadow-sm">
+                                    {{ type }}
+                                </span>
+                            </div>
+                        </ion-card-header>
+                    </ion-card>
+                </div>
+            </div>
+        </div>
     </ion-grid>
 </ion-content>
