@@ -51,7 +51,7 @@
     <ion-row class="max-w-5xl">
       <ion-col size="6" size-md="6" size-lg="3" *ngFor="let pokemon of pokemons">
         <ion-card (click)="goToDetails(pokemon.url)"
-          class="relative transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
+          class="relative min-w-[200px] cursor-pointer transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
           <div> <ion-buttons slot="start" class="absolute left-2 top-2 z-20">
               <ion-button fill="clear" (click)="toggleFavorite($event, pokemon.id)">
                 <ion-icon [name]="isFavorite(pokemon.id) ? 'star' : 'star-outline'"
