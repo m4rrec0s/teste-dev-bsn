@@ -96,4 +96,8 @@ export class DetailsPage implements OnInit {
   getTotalStats(): number {
     return this.pokemonService.getTotalStats(this.pokemon?.stats);
   }
+
+  goBack() {
+    window.history.back();
+  }
 }
