@@ -50,6 +50,11 @@ export class DetailsPage implements OnInit, OnDestroy {
           gif: this.pokemonService.getPokemonGif(data),
         };
 
+        // Verifica se os dados vieram do cache expirado
+        if (data._fromExpiredCache) {
+          this.pokemon._fromExpiredCache = true;
+        }
+
         this.loadPokemonSpecies(id);
       },
       error: (error) => {
@@ -64,6 +69,11 @@ export class DetailsPage implements OnInit, OnDestroy {
         this.pokemonSpecies = speciesData;
         this.description = this.pokemonService.extractDescription(speciesData);
 
+        // Verifica se os dados vieram do cache expirado
+        if (speciesData._fromExpiredCache) {
+          this.pokemonSpecies._fromExpiredCache = true;
+        }
+
         this.loading = false;
       },
       error: (error) => {
@@ -72,9 +82,8 @@ export class DetailsPage implements OnInit, OnDestroy {
       },
     });
   }
-
-  getTypeColor(type: string): string {
-    return this.pokemonService.getTypeColor(type);
+  getTypeColor(typeName: string): string {
+    return this.pokemonService.getTypeColor(typeName);
   }
 
   getStatName(statName: string): string {
@@ -124,5 +133,20 @@ export class DetailsPage implements OnInit, OnDestroy {
   }
   isFavorite(): boolean {
     return this.isFavorited;
+  }
+
+  reloadPokemonData() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      // Definimos o estado de carregamento
+      this.loading = true;
+
+      // Reiniciamos os estados para evitar exibir dados antigos
+      this.pokemon = null;
+      this.pokemonSpecies = null;
+
+      // Carregamos os dados novamente
+      this.loadPokemonDetails(id);
+    }
   }
 }

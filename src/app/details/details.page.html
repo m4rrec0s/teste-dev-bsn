@@ -1,7 +1,6 @@
-<ion-header [translucent]="true" class="bg-black shadow-xl border-b border-pokemon-yellow/20">
-  <ion-toolbar>
+<ion-header [translucent]="true" class="bg-black shadow-xl border-b border-pokemon-yellow/20"> <ion-toolbar>
     <ion-buttons slot="start" title="Voltar">
-      <ion-back-button onclick="goBack()"></ion-back-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title class="space-x-2 text-center font-extrabold text-xl tracking-wide">
       <span>{{ pokemon?.name | titlecase }}</span>
@@ -17,6 +16,23 @@
 </ion-header>
 
 <ion-content class="bg-gradient-to-br from-black via-neutral-900 to-neutral-950 text-white" *ngIf="pokemon">
+  <div *ngIf="pokemon?._fromExpiredCache || pokemonSpecies?._fromExpiredCache"
+    class="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 m-2 mt-4">
+    <div class="flex items-start gap-2">
+      <ion-icon name="warning-outline" class="text-yellow-500 text-xl mt-0.5"></ion-icon>
+      <div class="flex-1">
+        <p class="text-yellow-500 font-medium">Dados offline</p>
+        <p class="text-sm text-yellow-400/90">
+          Você está visualizando dados salvos localmente. Alguns detalhes podem estar incompletos ou desatualizados.
+        </p>
+        <ion-button size="small" fill="outline" color="warning" class="mt-2" (click)="reloadPokemonData()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Tentar recarregar
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 sm:grid-cols-2 bg-neutral-800/60 rounded-lg relative mx-2 px-4 mt-3">
     <div class="w-full h-full max-h-[400px] flex justify-center items-center">
       <ion-img [src]="pokemon.sprites?.other['official-artwork']?.front_default || pokemon.sprites?.front_default"
@@ -61,9 +77,10 @@
             <ion-col size="12" class="flex flex-col items-center">
               <span class="text-xs text-neutral-400 uppercase tracking-wide">Tipos</span>
               <div class="mt-2 flex flex-wrap justify-center gap-2">
-                <ion-chip *ngFor="let type of pokemon.types" [style.background-color]="getTypeColor(type.type.name)"
+                <ion-chip *ngFor="let type of pokemon.types"
+                  [style.background-color]="getTypeColor(type.type?.name || type)"
                   class="text-white font-semibold px-3 py-1 rounded-full border border-white/20">
-                  {{ type.type.name | titlecase }}
+                  {{ (type.type?.name || type) | titlecase }}
                 </ion-chip>
               </div>
             </ion-col>
@@ -91,7 +108,7 @@
         <ion-chip *ngFor="let ability of pokemon.abilities"
           [class]="ability.is_hidden ? 'bg-purple-600/40 border border-purple-400' : 'bg-pokemon-blue/20'"
           class="text-white font-semibold">
-          {{ ability.ability.name | titlecase }}
+          {{ ability.ability?.name | titlecase }}
           <span *ngIf="ability.is_hidden" class="text-xs text-purple-300 ml-1">(Oculta)</span>
         </ion-chip>
       </div>
