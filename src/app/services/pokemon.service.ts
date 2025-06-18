@@ -190,9 +190,6 @@ export class PokemonService {
       (path) => path && typeof path === 'string' && path.endsWith('.gif')
     );
 
-    console.log('GIF URLs candidatos:', paths);
-    console.log('GIF URL selecionado:', gifUrl);
-
     return gifUrl || '';
   }
 }
