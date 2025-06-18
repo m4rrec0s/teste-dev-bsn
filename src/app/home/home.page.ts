@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { PokemonService } from '../services/pokemon.service';
-import { switchMap, forkJoin } from 'rxjs';
+import { FavoritesService } from '../services/favorites.service';
+import { switchMap, forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   standalone: false,
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   pokemons: any[] = [];
   offset = 0;
   limit = 20;
@@ -19,12 +20,29 @@ export class HomePage implements OnInit {
   searchName: string = '';
   searchError: string = '';
   noResults: boolean = false;
+  favoriteCount: number = 0;
+  private favoritesSubscription: Subscription | null = null;
 
-  constructor(private pokemonService: PokemonService, private router: Router) {}
-
+  constructor(
+    private pokemonService: PokemonService,
+    private favoritesService: FavoritesService,
+    private router: Router
+  ) {}
   ngOnInit() {
     this.loadTypes();
     this.loadPokemons();
+
+    this.favoritesSubscription = this.favoritesService.favorites$.subscribe(
+      (favorites) => {
+        this.favoriteCount = favorites.length;
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    if (this.favoritesSubscription) {
+      this.favoritesSubscription.unsubscribe();
+    }
   }
 
   loadTypes() {
@@ -71,6 +89,19 @@ export class HomePage implements OnInit {
   getTypeColor(type: string): string {
     return this.pokemonService.getTypeColor(type);
   }
+
+  toggleFavorite(event: Event, pokemonId: number): void {
+    event.stopPropagation();
+    this.favoritesService.toggleFavorite(pokemonId);
+  }
+
+  isFavorite(pokemonId: number): boolean {
+    return this.favoritesService.isFavorite(pokemonId);
+  }
+  getFavoritesCount(): number {
+    return this.favoriteCount;
+  }
+
   onTypeChange() {
     this.searchError = '';
     this.noResults = false;

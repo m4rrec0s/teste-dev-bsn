@@ -3,6 +3,13 @@
     <ion-title class="font-extrabold text-2xl drop-shadow-md">
       Pokédex
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/favorites">
+        <ion-icon name="star" class="text-yellow-400 mr-1"></ion-icon>
+        Favoritos
+        <ion-badge *ngIf="getFavoritesCount() > 0" color="warning" class="ml-1">{{ getFavoritesCount() }}</ion-badge>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -44,7 +51,14 @@
     <ion-row class="max-w-5xl">
       <ion-col size="6" size-md="6" size-lg="3" *ngFor="let pokemon of pokemons">
         <ion-card (click)="goToDetails(pokemon.url)"
-          class="transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
+          class="relative transform transition-all hover:-translate-y-2 duration-300 hover:shadow-pokemon border border-neutral-800 rounded-2xl bg-neutral-900/80 backdrop-blur-md">
+          <div> <ion-buttons slot="start" class="absolute left-2 top-2 z-20">
+              <ion-button fill="clear" (click)="toggleFavorite($event, pokemon.id)">
+                <ion-icon [name]="isFavorite(pokemon.id) ? 'star' : 'star-outline'"
+                  [class]="isFavorite(pokemon.id) ? 'text-yellow-400' : 'text-white/80'"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </div>
           <ion-toolbar
             class="relative overflow-hidden rounded-t-2xl flex justify-center items-center p-4 bg-neutral-100/60">
             <ion-img [src]="pokemon.image" [alt]="pokemon.name + ' sprite'"
@@ -57,18 +71,18 @@
             <ion-card-title class="text-xl font-bold text-white drop-shadow-sm">
               {{ pokemon.name | titlecase }}
             </ion-card-title>
-            <ion-toolbar class="flex flex-wrap justify-center gap-2 mt-2">
+            <div class="flex flex-wrap justify-center space-x-2 mt-2">
               <span *ngFor="let type of pokemon.types" [style.background-color]="getTypeColor(type)"
-                class="px-2 py-1 rounded-full text-xs font-semibold text-white border border-white/20 shadow-sm">
+                class="px-2 py-1 rounded-full text-xs font-semibold text-white border shadow-sm">
                 {{ type | titlecase }}
               </span>
-            </ion-toolbar>
+            </div>
           </ion-card-header>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
-  <ion-toolbar class="mt-8 mb-4 w-full flex items-center justify-center"
+  <div class="mt-8 mb-4 w-full flex items-center justify-center"
     *ngIf="!loading && !noResults && !selectedType && !searchName && pokemons.length > 0">
     <ion-button expand="block" (click)="loadPokemons()" [disabled]="loadingMore"
       class="rounded-2xl px-3 py-2 font-semibold text-base text-white shadow-lg transition duration-300">
@@ -79,5 +93,5 @@
       </span>
       <span *ngIf="loadingMore">Carregando mais...</span>
     </ion-button>
-  </ion-toolbar>
+  </div>
 </ion-content>
