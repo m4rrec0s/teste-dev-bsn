@@ -1,64 +1,158 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map, of, catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PokemonService {
   private baseUrl = 'https://pokeapi.co/api/v2';
+  private localCache: { [key: string]: any } = {};
+  private readonly CACHE_KEY_PREFIX = 'pokemon_cache_';
+  private readonly CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
   constructor(private http: HttpClient) {}
-  getPokemonList(limit: number = 20, offset: number = 0): Observable<any> {
-    return this.http
-      .get(`${this.baseUrl}/pokemon?limit=${limit}&offset=${offset}`)
-      .pipe(
-        map((response: any) => {
-          const pokemonRequests = response.results.map((pokemon: any) =>
-            this.http.get(pokemon.url)
-          );
 
-          return forkJoin(pokemonRequests).pipe(
-            map((pokemonDetails: any) =>
-              pokemonDetails.map((pokemon: any) => ({
-                name: pokemon.name,
-                url: `${this.baseUrl}/pokemon/${pokemon.id}`,
-                id: pokemon.id,
-                image:
-                  pokemon.sprites.other['official-artwork'].front_default ||
-                  pokemon.sprites.front_default ||
-                  'assets/icon/favicon.png',
-                gif: this.getPokemonGif(pokemon),
-                types: pokemon.types.map((type: any) => type.type.name),
-              }))
-            )
-          );
+  private getCacheKey(endpoint: string): string {
+    return this.CACHE_KEY_PREFIX + endpoint.replace(/[\/\?=&]/g, '_');
+  }
+
+  private getFromCache(endpoint: string): any {
+    const cacheKey = this.getCacheKey(endpoint);
+    if (this.localCache[cacheKey]) {
+      return this.localCache[cacheKey];
+    }
+
+    const storedItem = localStorage.getItem(cacheKey);
+    if (storedItem) {
+      try {
+        const parsedItem = JSON.parse(storedItem);
+        if (
+          parsedItem.timestamp &&
+          Date.now() - parsedItem.timestamp < this.CACHE_EXPIRY
+        ) {
+          this.localCache[cacheKey] = parsedItem.data;
+          return parsedItem.data;
+        } else {
+          console.log('Cache expirado:', endpoint);
+        }
+      } catch (error) {
+        console.error('Erro ao ler cache:', error);
+        localStorage.removeItem(cacheKey);
+      }
+    }
+    return null;
+  }
+  private getExpiredCache(endpoint: string): any {
+    const cacheKey = this.getCacheKey(endpoint);
+    const storedItem = localStorage.getItem(cacheKey);
+    if (storedItem) {
+      try {
+        const parsedItem = JSON.parse(storedItem);
+        console.log('Usando dados expirados do cache como fallback:', endpoint);
+        parsedItem.data._fromExpiredCache = true;
+        return parsedItem.data;
+      } catch (e) {
+        console.error('Erro ao ler cache expirado:', e);
+      }
+    }
+    return null;
+  }
+
+  private saveToCache(endpoint: string, data: any): void {
+    const cacheKey = this.getCacheKey(endpoint);
+    this.localCache[cacheKey] = data;
+    try {
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          data,
+          timestamp: Date.now(),
         })
       );
+    } catch (error) {
+      console.error('Erro ao salvar cache:', error);
+    }
+  }
+
+  private get<T>(url: string): Observable<T> {
+    const cachedData = this.getFromCache(url);
+    if (cachedData) {
+      console.log('Dados obtidos do cache:', url);
+      return of(cachedData);
+    }
+
+    return this.http.get<T>(url).pipe(
+      map((response) => {
+        this.saveToCache(url, response);
+        return response;
+      }),
+      catchError((error) => {
+        console.error(`Erro ao acessar ${url}:`, error);
+        const expiredData = this.getExpiredCache(url);
+        if (expiredData) {
+          return of(expiredData);
+        }
+        throw error;
+      })
+    );
+  }
+
+  getPokemonList(limit: number = 20, offset: number = 0): Observable<any> {
+    const url = `${this.baseUrl}/pokemon?limit=${limit}&offset=${offset}`;
+
+    return this.get<any>(url).pipe(
+      map((response: any) => {
+        const pokemonRequests = response.results.map((pokemon: any) =>
+          this.get<any>(pokemon.url)
+        );
+
+        return forkJoin(pokemonRequests).pipe(
+          map((pokemonDetails: any) =>
+            pokemonDetails.map((pokemon: any) => ({
+              name: pokemon.name,
+              url: `${this.baseUrl}/pokemon/${pokemon.id}`,
+              id: pokemon.id,
+              image:
+                pokemon.sprites.other['official-artwork'].front_default ||
+                pokemon.sprites.front_default ||
+                'assets/icon/favicon.png',
+              gif: this.getPokemonGif(pokemon),
+              types: pokemon.types.map((type: any) => type.type.name),
+            }))
+          )
+        );
+      })
+    );
   }
 
   getPokemonDetails(id: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/pokemon/${id}`);
+    const url = `${this.baseUrl}/pokemon/${id}`;
+    return this.get<any>(url);
   }
 
   getPokemonSpecies(id: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/pokemon-species/${id}`);
+    const url = `${this.baseUrl}/pokemon-species/${id}`;
+    return this.get<any>(url);
   }
 
   getAllTypes(): Observable<any> {
-    return this.http
-      .get(`${this.baseUrl}/type`)
-      .pipe(map((res: any) => res.results.map((type: any) => type.name)));
+    const url = `${this.baseUrl}/type`;
+    return this.get<any>(url).pipe(
+      map((res: any) => res.results.map((type: any) => type.name))
+    );
   }
 
   getPokemonByName(name: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/pokemon/${name}`);
+    const url = `${this.baseUrl}/pokemon/${name}`;
+    return this.get<any>(url);
   }
 
   getPokemonsByType(type: string): Observable<any> {
-    return this.http
-      .get(`${this.baseUrl}/type/${type}`)
-      .pipe(map((res: any) => res.pokemon.map((p: any) => p.pokemon.name)));
+    const url = `${this.baseUrl}/type/${type}`;
+    return this.get<any>(url).pipe(
+      map((res: any) => res.pokemon.map((p: any) => p.pokemon.name))
+    );
   }
 
   getTypeColor(type: string): string {
