@@ -1,3 +1,7 @@
+<div align="center">
+   <img src="./docs/images/thumb.png" alt="Pokédex App Banner" width="100%" style="max-width: 100%; height: auto;">
+</div>
+
 # Pokédex App - Ionic Angular
 
 Uma aplicação Pokédex desenvolvida com Ionic e Angular que permite visualizar informações detalhadas dos Pokémons, além da possibilidade de salva-los como favorito.
